@@ -1,0 +1,20 @@
+from fastapi import FastAPI
+from routes import weather
+from services.weather_fetcher import fetch_and_store_weather
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Runs once when the app starts
+    fetch_and_store_weather()
+    yield
+    # Runs once when the app shuts down (optional cleanup code can go here)
+
+app = FastAPI(lifespan=lifespan)
+
+@app.get("/")
+def test():
+    return {"hello": "world"}
+
+app.include_router(weather.router, prefix="/weather", tags=["Weather"])
+
