@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from .db import SessionLocal, engine
 from .models import Base, Weather
 
-API_KEY = "YOUR_WEATHERAPI_KEY"
+API_KEY = "1046fa4e5a634f7e998191145252305"
 CITIES = ["Auckland", "Sydney", "New York", "London"]
 
 Base.metadata.create_all(bind=engine)
