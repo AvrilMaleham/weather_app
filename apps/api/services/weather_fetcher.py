@@ -1,34 +1,46 @@
-import requests
+import httpx
+from .db import SessionLocal
+from .models import Weather
 from datetime import datetime, timedelta
-from .db import SessionLocal, engine
-from .models import Base, Weather
 
-API_KEY = "1046fa4e5a634f7e998191145252305"
-CITIES = ["Auckland", "Sydney", "New York", "London"]
+CITY_COORDS = {
+    "Auckland": (-36.8485, 174.7633),
+    "Sydney": (-33.8688, 151.2093),
+    "New York": (40.7128, -74.0060),
+    "London": (51.5074, -0.1278),
+}
 
-Base.metadata.create_all(bind=engine)
+def get_most_recent_7_days():
+    today = datetime.today()
+    end_date = (today - timedelta(days=7)).strftime('%Y-%m-%d')
+    start_date = (today - timedelta(days=14)).strftime('%Y-%m-%d')
+    return start_date, end_date
+    
 
-def fetch_and_store_weather():
+async def fetch_and_store_weather():
     session = SessionLocal()
-    try:
-        for city in CITIES:
-            for i in range(7):
-                date = (datetime.today() - timedelta(days=i)).strftime('%Y-%m-%d')
-                url = f"http://api.weatherapi.com/v1/history.json?key={API_KEY}&q={city}&dt={date}"
-                response = requests.get(url)
-                data = response.json()
-                day = data['forecast']['forecastday'][0]['day']
-                condition = day['condition']['text']
+    start_date, end_date = get_most_recent_7_days()
 
-                weather = Weather(
-                    city=city,
-                    date=date,
-                    maxtemp_c=day['maxtemp_c'],
-                    mintemp_c=day['mintemp_c'],
-                    avgtemp_c=day['avgtemp_c'],
-                    condition_text=condition
+    async with httpx.AsyncClient() as client:
+        try:
+            for city, (lat, lon) in CITY_COORDS.items():
+                url = (
+                    f"https://archive-api.open-meteo.com/v1/archive?"
+                    f"latitude={lat}&longitude={lon}&start_date={start_date}"
+                    f"&end_date={end_date}&daily=temperature_2m_mean&timezone=auto"
                 )
-                session.add(weather)
-        session.commit()
-    finally:
-        session.close()
+                response = await client.get(url)
+                data = response.json()
+
+                for date, avgtemp in zip(data["daily"]["time"], data["daily"]["temperature_2m_mean"]):
+                    date_obj = datetime.strptime(date, "%Y-%m-%d").date()
+                    weather = Weather(
+                        city=city,
+                        date=date_obj,
+                        avgtemp_c=avgtemp,
+                    )
+                    session.add(weather)
+
+            session.commit()
+        finally:
+            session.close()

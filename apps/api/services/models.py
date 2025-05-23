@@ -7,7 +7,5 @@ class Weather(Base):
     id = Column(Integer, primary_key=True, index=True)
     city = Column(String, index=True)
     date = Column(Date, index=True)
-    maxtemp_c = Column(Float)
-    mintemp_c = Column(Float)
     avgtemp_c = Column(Float)
-    condition_text = Column(String)
+  

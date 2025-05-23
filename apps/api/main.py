@@ -2,19 +2,15 @@ from fastapi import FastAPI
 from routes import weather
 from services.weather_fetcher import fetch_and_store_weather
 from contextlib import asynccontextmanager
-
-# @asynccontextmanager
-# async def lifespan(_app: FastAPI):
-#     # Runs once when the app starts
-#     await fetch_and_store_weather()  # Added 'await' here
-#     yield
-#     # Runs once when the app shuts down (optional cleanup code can go here)
+from services.db import Base, engine
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    print("🌟 App is starting up!")  # This will show in the Docker or terminal logs
+    # Runs once when the app starts
+    Base.metadata.create_all(bind=engine)
+    await fetch_and_store_weather()
     yield
-    print("👋 App is shutting down!")  # This runs on shutdown
+    # Runs once when the app shuts down (optional cleanup code can go here)
 
 app = FastAPI(lifespan=lifespan)
 

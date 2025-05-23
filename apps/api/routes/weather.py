@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from services.weather_fetcher import fetch_and_store_weather
 
 router = APIRouter()
 
