@@ -3,14 +3,6 @@ from .db import SessionLocal
 from .models import City, WeatherHistory
 from datetime import datetime, timedelta
 
-CITY_COORDS = {
-    "Auckland": (-36.8485, 174.7633),
-    "Sydney": (-33.8688, 151.2093),
-    "London": (51.5074, -0.1278),
-    "Los Angeles": (34.0522, -118.2437),
-    "Bengaluru": (12.9716, 77.5946),
-}
-
 def get_most_recent_7_days():
     today = datetime.today()
     end_date = (today - timedelta(days=7)).strftime('%Y-%m-%d')
@@ -23,15 +15,12 @@ async def fetch_and_store_weather():
 
     async with httpx.AsyncClient() as client:
         try:
-            for city_name in CITY_COORDS.keys():
-                city = session.query(City).filter_by(name=city_name).first()
-                if not city:
-                    city = City(name=city_name)
-                    session.add(city)
-            session.commit()
+            # Fetch all cities from DB with their lat/lon
+            cities = session.query(City).all()
 
-            for city_name, (lat, lon) in CITY_COORDS.items():
-                city = session.query(City).filter_by(name=city_name).first()
+            for city in cities:
+                lat = city.latitude
+                lon = city.longitude
 
                 url = (
                     f"https://archive-api.open-meteo.com/v1/archive?"
@@ -67,3 +56,4 @@ async def fetch_and_store_weather():
             session.commit()
         finally:
             session.close()
+
