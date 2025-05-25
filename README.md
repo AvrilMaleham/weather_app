@@ -22,7 +22,7 @@ Move into the correct directory.
 
 ### `docker-compose up -d`
 
-Sets up a docker container for the DB **and** a docker container for the API.
+Sets up a Docker container for the DB **and** a Docker container for the API.
 
 Open [http://localhost:8000/docs](http://localhost:8000/docs) to view the Swagger the browser.
 
