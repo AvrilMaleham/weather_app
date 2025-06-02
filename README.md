@@ -6,14 +6,6 @@ To view this project locally:
 
 Clone the app into the directory of your choice.
 
-### `python -m venv venv`
-
-Create a virtual environment (optional but recommended).
-
-### `pip install -r requirements.txt`
-
-Install dependencies.
-
 Make sure **Docker** is installed locally.
 
 ### `cd apps/api`
@@ -24,7 +16,7 @@ Move into the correct directory.
 
 Sets up a Docker container for the DB **and** a Docker container for the API.
 
-Open [http://localhost:8000/docs](http://localhost:8000/docs) to view the Swagger the browser.
+Open [http://localhost:8000/docs](http://localhost:8000/docs) to view the Swagger docs in the browser.
 
 ### `docker exec -it api-db-1 psql -U postgres -d weatherdb`
 
